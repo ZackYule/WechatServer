@@ -1,0 +1,7 @@
+config.json
+itchat_message_data_20231224_160954.json
+itchat.pkl
+run.log
+*.pyc
+pg*
+venv
