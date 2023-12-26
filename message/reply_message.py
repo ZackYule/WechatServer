@@ -49,10 +49,9 @@ class Reply:
     - receiver: 回复的接收者，默认为 None。
     """
 
-    def __init__(self, type: ReplyType = None, content=None, receiver=None):
+    def __init__(self, type: ReplyType = None, content=None):
         self.type = type
         self.content = content
-        self.receiver = receiver
 
     def __str__(self):
         return f"Reply(type={self.type}, content={self.content}, receiver={self.receiver})"

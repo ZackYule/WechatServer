@@ -1,9 +1,51 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import Optional
 
 
 class UniversalMessageWrapper(BaseModel):
-    raw_message: dict  # 假设 raw_message 是一个字典
-    source: str  # 假设 source 是一个字符串
-    app: str  # 假设 app 也是一个字符串
+    raw_message: dict
+    source: str
+    app: str
+    receiver_id: str
+    sender_id: Optional[str] = None
+    group_flag: Optional[int] = Field(
+        None,
+        description="0 for private chat, 1 for group chat, None if uncertain")
 
-    # 如果有其他方法或验证逻辑，也可以在这里定义
+    class Config:
+        # 使用Config类来提供模型的配置
+        arbitrary_types_allowed = True
+        schema_extra = {
+            "example": {
+                "raw_message": {
+                    "type": "text",
+                    "content": "Hello!"
+                },
+                "source": "wechat",
+                "app": "my_chat_app",
+                "receiver_id": "receiver123",
+                "sender_id": "sender456",
+                "group_flag": -1
+            }
+        }
+
+
+def main():
+    example_message = UniversalMessageWrapper(
+        raw_message={
+            "type": "text",
+            "content": "Hello, world!"
+        },
+        source="example_source",
+        app="example_app",
+        receiver_id="example_receiver",
+        sender_id="example_sender",
+        # group_flag 可以省略
+    )
+
+    print(example_message)
+
+
+if __name__ == '__main__':
+    main()
+# 示例使用
