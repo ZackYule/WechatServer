@@ -1,5 +1,6 @@
 import io
 import os
+from typing import Any, Dict
 import requests
 from lib import itchat
 from lib.itchat.content import TEXT, VOICE, PICTURE, NOTE, ATTACHMENT, SHARING
@@ -11,55 +12,59 @@ from message.universal_message import UniversalMessageWrapper
 from utils.qr_callback import qrCallback
 
 
+def process_message(msg: Dict[str, Any], group_flag: int):
+    """
+    处理微信消息，并封装成 UniversalMessageWrapper。
+
+    :param msg: 微信消息对象。
+    :param group_flag: 群聊标志，0 表示私聊，1 表示群聊。
+    :return: None
+    """
+    try:
+        # 获取发送者和接收者的ID
+        sender_id = msg["FromUserName"]
+        receiver_id = msg["ToUserName"]
+
+        # 封装消息
+        wrapped_msg = UniversalMessageWrapper(raw_message=msg,
+                                              source='itchat',
+                                              app='wechat',
+                                              receiver_id=receiver_id,
+                                              sender_id=sender_id,
+                                              group_flag=group_flag)
+
+        # 发送消息
+        MessageManager().send_message(wrapped_msg)
+    except NotImplementedError as e:
+        log.debug(
+            f"[WX] Skipped processing message with ID {msg['MsgId']}: {e}")
+
+
+# 注册处理个人消息的函数
 @itchat.msg_register([TEXT, VOICE, PICTURE, NOTE, ATTACHMENT, SHARING])
-def handle_individual_message(msg):
+def handle_individual_message(msg: Dict[str, Any]):
     """
     处理单个微信消息。
     
     :param msg: 微信消息对象。
     :return: None
     """
-    try:
-        msg['IsGroup'] = False
-        sender_id = msg["FromUserName"]
-        receiver_id = msg["ToUserName"]
-        wrapped_msg = UniversalMessageWrapper(raw_message=msg,
-                                              source='itchat',
-                                              app='wechat',
-                                              receiver_id=receiver_id,
-                                              sender_id=sender_id,
-                                              group_flag=0)
-        MessageManager().send_message(wrapped_msg)
-    except NotImplementedError as e:
-        log.debug(
-            f"[WX] Skipped processing single message with ID {msg['MsgId']}: {e}"
-        )
+    msg['IsGroup'] = False
+    process_message(msg, group_flag=0)
 
 
+# 注册处理群聊消息的函数
 @itchat.msg_register([TEXT, VOICE, PICTURE, NOTE, ATTACHMENT, SHARING],
                      isGroupChat=True)
-def handle_group_message(msg):
+def handle_group_message(msg: Dict[str, Any]):
     """
     处理微信群聊消息。
     
     :param msg: 微信消息对象。
     :return: None
     """
-    try:
-        msg['IsGroup'] = True
-        sender_id = msg["FromUserName"]
-        receiver_id = msg["ToUserName"]
-        wrapped_msg = UniversalMessageWrapper(raw_message=msg,
-                                              source='itchat',
-                                              app='wechat',
-                                              receiver_id=receiver_id,
-                                              sender_id=sender_id,
-                                              group_flag=1)
-        MessageManager().send_message(wrapped_msg)
-    except NotImplementedError as e:
-        log.debug(
-            f"[WX] Skipped processing group message with ID {msg['MsgId']}: {e}"
-        )
+    msg['IsGroup'] = True
+    process_message(msg, group_flag=1)
 
 
 def send_message(message: UniversalMessageWrapper):
