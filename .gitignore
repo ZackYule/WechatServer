@@ -5,3 +5,4 @@ run.log
 *.pyc
 pg*
 venv
+.DS_Store

@@ -15,7 +15,7 @@ class UniversalMessageWrapper(BaseModel):
     class Config:
         # 使用Config类来提供模型的配置
         arbitrary_types_allowed = True
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "raw_message": {
                     "type": "text",
