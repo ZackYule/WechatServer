@@ -25,13 +25,14 @@ class MessageManager:
 
     def start(self):
         threading.Thread(target=self.listen_sse).start()
-        threading.Thread(target=self.process_messages).start()
+        threading.Thread(target=self.process_recv_queue).start()
         threading.Thread(target=self.process_send_queue).start()
 
     def send_message(self, message):
         self._add_message_to_send_queue(message)
 
     def _add_message_to_send_queue(self, message):
+        log.info('🚀🚀🚀🚀🚀🚀放入接收消息队列')
         self.send_queue.put({
             'message': message,
             'timestamp': time.time(),
@@ -40,12 +41,12 @@ class MessageManager:
 
     async def async_send_message(self, message_data):
         message_json = json.dumps(message_data['message'].model_dump())
-        log.debug(message_json)
+        log.info('🚀🚀🚀🚀🚀🚀消息管理器发送消息到后端')
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.base_url + self.message_post_path,
                                  data=message_json,
                                  headers=headers)
-        log.debug(response)
+        log.debug(f'🚀🚀🚀🚀🚀🚀请求回复：{response}')
         if response.status_code == 200:
             # 如果请求成功，则将响应的内容放入接收队列
             res = response.json()
@@ -91,16 +92,18 @@ class MessageManager:
         while True:
             if not self.send_queue.empty():
                 message_data = self.send_queue.get()
+                log.info('🚀🚀🚀🚀🚀🚀取到接收消息队列里的消息开始处理')
                 current_time = time.time()
                 if current_time - message_data['timestamp'] > self.retry_delay:
                     message_data['retry_count'] += 1
                     message_data['timestamp'] = current_time
                 asyncio.run(self.async_send_message(message_data))
 
-    def process_messages(self):
+    def process_recv_queue(self):
         while True:
             if not self.recv_queue.empty():
                 message = self.recv_queue.get()
+                log.info('🚀🚀🚀🚀🚀🚀取到发送队列里的消息开始处理')
                 self.process_fn(message)
 
 

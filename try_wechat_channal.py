@@ -9,6 +9,7 @@ from message.reply_message import Reply, ReplyType
 from message_manager import MessageManager
 from utils.log_setup import log
 from message.universal_message import UniversalMessageWrapper
+from utils.massage_saver import save_message_to_json
 from utils.qr_callback import qrCallback
 
 
@@ -32,7 +33,7 @@ def process_message(msg: Dict[str, Any], group_flag: int):
                                               receiver_id=receiver_id,
                                               sender_id=sender_id,
                                               group_flag=group_flag)
-
+        save_message_to_json(wrapped_msg)
         # 发送消息
         MessageManager().send_message(wrapped_msg)
     except NotImplementedError as e:
