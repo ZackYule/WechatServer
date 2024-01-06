@@ -49,6 +49,7 @@ def handle_individual_message(msg: Dict[str, Any]):
     :param msg: 微信消息对象。
     :return: None
     """
+    log.info('收到私聊消息🚀🚀🚀🚀🚀🚀')
     msg['IsGroup'] = False
     process_message(msg, group_flag=0)
 
@@ -63,6 +64,7 @@ def handle_group_message(msg: Dict[str, Any]):
     :param msg: 微信消息对象。
     :return: None
     """
+    log.info('收到群聊消息🚀🚀🚀🚀🚀🚀')
     msg['IsGroup'] = True
     process_message(msg, group_flag=1)
 
